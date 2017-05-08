@@ -8,11 +8,11 @@ def getConfigFileHash(file):
 
 def certbotAccountSet(email):
     """Sets certbot account"""
-    check_call(["/tmp/certbot-auto", "register", "-m", email, "--agree-tos", "-n"])
+    check_call([certbotBinPath, "register", "-m", email, "--agree-tos", "-n"])
 
 def certbotIssueCert(certName, domainNames, dryRun):
     """Issue cert"""
-    command = ["/tmp/certbot-auto", "certonly", "-n", "--standalone", "--preferred-challenges", "http"]
+    command = [certbotBinPath, "certonly", "-n", "--standalone", "--preferred-challenges", "http"]
     if dryRun:
         command.append("--dry-run")
     for domainName in domainNames:
@@ -33,6 +33,7 @@ configStream.close()
 
 configStream = open(sys.argv[1], 'r')
 config = yaml.load(configStream)
+certbotBinPath = config['certbotBinPath']
 email = config['email']
 dryRun = bool(config['dryRun'])
 certs = config['certs']
