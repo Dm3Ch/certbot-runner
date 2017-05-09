@@ -1,4 +1,5 @@
 certbotBinPath: "/tmp/certbot-auto"
+certsDir: "/tmp"
 dryRun: false
 email: "example@example.com"
 certs:

@@ -1,4 +1,5 @@
 import sys
+import os
 import hashlib
 import yaml
 from subprocess import check_call
@@ -34,12 +35,19 @@ configStream.close()
 configStream = open(sys.argv[1], 'r')
 config = yaml.load(configStream)
 certbotBinPath = config['certbotBinPath']
+certsDir = config['certsDir']
 email = config['email']
 dryRun = bool(config['dryRun'])
 certs = config['certs']
 configStream.close()
 
-certbotAccountSet(email)
+if os.listdir('/etc/letsencrypt') == []:
+    print("\nSetting account:\n")
+    certbotAccountSet(email)
 
+print("\nIssuing certs:\n")
 for cert in certs:
     certbotIssueCert(cert['certName'], cert['domainNames'], dryRun)
+
+print("\nCopying certs to destination dir:\n")
+check_call(["/bin/sh", "-c", "cp -r /etc/letsencrypt/live/* "+certsDir])
