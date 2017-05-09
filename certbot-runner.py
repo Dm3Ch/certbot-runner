@@ -1,15 +1,14 @@
 import sys
-import os
 import hashlib
 import yaml
-from subprocess import check_call
+from subprocess import check_call, call
 
 def getConfigFileHash(file):
     return hashlib.sha256(file.read()).hexdigest()
 
 def certbotAccountSet(email):
     """Sets certbot account"""
-    check_call([certbotBinPath, "register", "-m", email, "--agree-tos", "-n"])
+    call([certbotBinPath, "register", "-m", email, "--agree-tos", "-n"])
 
 def certbotIssueCert(certName, domainNames, dryRun):
     """Issue cert"""
@@ -69,3 +68,10 @@ if configHash != oldConfigHash:
         oldConfigHashFile = open(certsDir+'/config.hash', 'w')
         oldConfigHashFile.write(configHash)
         oldConfigHashFile.close()
+else:
+    print("\nSetting account:\n")
+    certbotAccountSet(email)
+    print("\nRenewing certs:\n")
+    check_call([certbotBinPath, "renew", "-n", "--standalone", "--preferred-challenges", "http"])
+    print("\nCopying certs to destination dir:\n")
+    check_call(["/bin/sh", "-c", "cp -rf /etc/letsencrypt/live/* " + certsDir])
