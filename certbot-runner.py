@@ -30,6 +30,7 @@ if len(sys.argv) < 2:
 configStream = open(sys.argv[1], 'rb')
 configHash = getConfigFileHash(configStream)
 print("Config file hash:", configHash)
+
 configStream.close()
 
 configStream = open(sys.argv[1], 'r')
@@ -41,13 +42,30 @@ dryRun = bool(config['dryRun'])
 certs = config['certs']
 configStream.close()
 
-if os.listdir('/etc/letsencrypt') == []:
+oldConfigHash = ''
+try:
+    oldConfigHashFile = open(certsDir + '/config.hash', 'r')
+    oldConfigHash = oldConfigHashFile.read()
+    print("Old config file hash:", oldConfigHash)
+    oldConfigHashFile.close()
+except FileNotFoundError:
+    print("Old config file doesn't exists")
+
+if configHash != oldConfigHash:
+    check_call(["/bin/sh", "-c", "rm -rf /etc/letsencrypt/*"])
+    check_call(["/bin/sh", "-c", "rm -rf " + certsDir + "/*"])
+
     print("\nSetting account:\n")
     certbotAccountSet(email)
 
-print("\nIssuing certs:\n")
-for cert in certs:
-    certbotIssueCert(cert['certName'], cert['domainNames'], dryRun)
+    print("\nIssuing certs:\n")
+    for cert in certs:
+        certbotIssueCert(cert['certName'], cert['domainNames'], dryRun)
 
-print("\nCopying certs to destination dir:\n")
-check_call(["/bin/sh", "-c", "cp -r /etc/letsencrypt/live/* "+certsDir])
+    if not dryRun:
+        print("\nCopying certs to destination dir:\n")
+        check_call(["/bin/sh", "-c", "cp -r /etc/letsencrypt/live/* " + certsDir])
+
+        oldConfigHashFile = open(certsDir+'/config.hash', 'w')
+        oldConfigHashFile.write(configHash)
+        oldConfigHashFile.close()
