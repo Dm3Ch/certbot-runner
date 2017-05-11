@@ -1,6 +1,9 @@
 certbotBinPath: "/tmp/certbot-auto"
 certsDir: "/tmp"
 dryRun: false
+alwaysZeroReturnCode: false
+sentryEnable: false
+sentryDSN: ""
 email: "example@example.com"
 certs:
 - certName: "Cert 1"
