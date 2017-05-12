@@ -97,16 +97,15 @@ if sentryEnable:
     sentryDSN = config["sentryDSN"]
     print("Sentry reporting enabled, sentry DSN was found in config")
     sentryClient = Client(sentryDSN)
-    # sentryHandler = SentryHandler(sentryClient)
-    # setup_logging(SentryHandler)
-    # logger = logging.getLogger(__name__)
-    # logger.setLevel(logging.DEBUG)
-
+    handler = SentryHandler(sentryClient)
+    handler.setLevel(logging.INFO)
+    setup_logging(handler)
+    logger = logging.getLogger(__name__)
+    logger.addHandler(handler)
 configStream.close()
 
-# if sentryEnable:
-#     print("Test")
-#     logger.fatal("Certbot runner was started")
+if sentryEnable:
+    logger.info("Certbot runner was started")
 
 try:
     certbotWork()
@@ -122,3 +121,6 @@ except Exception:
         sys.exit()
     else:
         raise
+
+if sentryEnable:
+    logger.info("Certbot runner has successfully ended")
