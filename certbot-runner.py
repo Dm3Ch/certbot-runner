@@ -42,6 +42,8 @@ def certbotWork():
         certbotAccountSet(email)
 
         print("\nIssuing certs:\n")
+        logger.info("Certbot runner is issuing certs")
+
         for cert in certs:
             certbotIssueCert(cert['certName'], cert['domainNames'], dryRun)
 
@@ -56,6 +58,7 @@ def certbotWork():
         print("\nSetting account:\n")
         certbotAccountSet(email)
         print("\nRenewing certs:\n")
+        logger.info("Certbot runner is renewing certs")
         check_call([certbotBinPath, "renew", "-n", "--standalone", "--preferred-challenges", "http"])
         print("\nCopying certs to destination dir:\n")
         check_call(["/bin/sh", "-c", "cp -rf /etc/letsencrypt/live/* " + certsDir])
